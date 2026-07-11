@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>OneStop DriveIn — Inventory & Pantry</title>
+<meta name="theme-color" content="#8B0000">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT25lU3RvcCBEcml2ZUluIEludmVudG9yeSIsInNob3J0X25hbWUiOiJJbnZlbnRvcnkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZBRjZFRSIsInRoZW1lX2NvbG9yIjoiIzhCMDAwMCJ9">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --maroon: #8B0000;
+    --maroon-dark: #5c0000;
+    --turmeric: #E0A527;
+    --turmeric-dark: #b3830f;
+    --cream: #FAF6EE;
+    --ink: #2A211C;
+    --ink-soft: #6b5f56;
+    --line: #E7DCC9;
+    --card: #FFFFFF;
+    --good: #2f7d4f;
+    --warn: #b3830f;
+    --danger: #a1332b;
+    --radius: 14px;
+    --shadow: 0 2px 10px rgba(60,40,20,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 100px;
+  }
+  h1,h2,h3, .display{ font-family: 'Baloo 2', 'Inter', sans-serif; }
+
+  /* ---------- Header ---------- */
+  header{
+    position: sticky; top:0; z-index: 30;
+    background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+    color: white;
+    padding: 14px 16px 0px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  }
+  .header-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .emoji{ font-size: 26px; }
+  .brand-text .title{ font-family:'Baloo 2', sans-serif; font-weight: 800; font-size: 18px; line-height: 1.1; }
+  .brand-text .subtitle{ font-size: 11.5px; opacity:0.85; letter-spacing: 0.02em; }
+  .header-actions{ display:flex; align-items:center; gap: 8px; }
+
+  .bell-btn{
+    position:relative; width:40px; height:40px; border-radius: 50%;
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25);
+    color:white; font-size:18px; display:flex;align-items:center;justify-content:center; cursor:pointer;
+  }
+  .bell-btn .badge{
+    position:absolute; top:-4px; right:-4px; background: var(--turmeric); color: var(--ink);
+    font-size: 10.5px; font-weight:800; min-width:18px; height:18px; border-radius:9px;
+    display:flex;align-items:center;justify-content:center; padding: 0 4px; border: 2px solid var(--maroon-dark);
+  }
+
+  .sync-status{ font-size:11px; margin-top:8px; opacity:.9; display:flex; align-items:center; gap:5px; }
+  .sync-status::before{ content:'●'; font-size:9px; }
+  .sync-status.ok{ color:#BFE8C4; }
+  .sync-status.ok::before{ color:#6FD17E; }
+  .sync-status.bad{ color:#F3CFC5; }
+  .sync-status.bad::before{ color:#E8836C; }
+
+  .who-row{
+    margin-top: 10px; display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.12); border-radius: 10px; padding: 6px 10px;
+  }
+  .who-row label{ font-size: 12px; opacity:0.9; white-space:nowrap;}
+  .who-row select{
+    flex:1; background: transparent; border:none; color:white; font-size: 14px; font-weight:600;
+    -webkit-appearance:none; appearance:none; padding:4px 2px;
+  }
+  .who-row select option{ color: var(--ink); }
+
+  /* ---------- Tabs ---------- */
+  .tab-row{ display:flex; gap:4px; margin-top:14px; }
+  .tab-btn{
+    flex:1; text-align:center; padding: 9px 3px 11px; border:none; cursor:pointer;
+    background: transparent; color: rgba(255,255,255,0.72); font-family:'Baloo 2',sans-serif;
+    font-weight:700; font-size:12.5px; border-bottom: 3px solid transparent; white-space:nowrap;
+  }
+  .tab-btn.active{ color:#fff; border-bottom-color: var(--turmeric); }
+
+  /* ---------- Search + Add ---------- */
+  .toolbar{ padding: 14px 16px 4px; display:flex; gap:8px; }
+  .search-box{
+    flex:1; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 12px; display:flex; align-items:center; gap:8px; box-shadow: var(--shadow);
+  }
+  .search-box input{ border:none; outline:none; flex:1; font-size:14px; background:transparent; color:var(--ink); }
+  .add-btn{
+    background: var(--turmeric); color: var(--ink); border:none; border-radius: 12px; width: 46px;
+    font-size: 22px; font-weight:700; box-shadow: var(--shadow); cursor:pointer;
+  }
+  .cal-toggle-btn{
+    background: var(--card); border:1px solid var(--line); border-radius: 12px; width: 46px;
+    font-size: 18px; box-shadow: var(--shadow); cursor:pointer;
+  }
+  .cal-toggle-btn.active{ background: var(--maroon); border-color: var(--maroon); }
+  .stock-date-bar{ padding: 10px 16px 0; display:flex; gap:8px; align-items:center; }
+  .chip-btn.ghost{ background:#fff; color: var(--ink-soft); border:1px solid var(--line); }
+  .filter-banner{
+    margin: 10px 16px 0; background:#FFF6E0; border:1px solid #EAD49A; border-radius: 10px;
+    padding: 9px 12px; font-size:12.5px; color: var(--ink-soft); display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .filter-banner b{ color: var(--maroon-dark); }
+
+  .fab-note{ text-align:center; font-size:11.5px; color: var(--ink-soft); padding: 10px 24px 4px; }
+
+  /* ---------- Seed banner (Inventory tab only, one-time) ---------- */
+  .seed-banner{
+    margin: 10px 16px 4px; background:#FFF6E0; border:1px solid #EAD49A; border-radius: var(--radius);
+    padding: 14px; display:none;
+  }
+  .seed-banner.show{ display:block; }
+  .seed-banner .seed-title{ font-weight:800; font-family:'Baloo 2',sans-serif; color: var(--maroon-dark); margin-bottom:4px;}
+  .seed-banner .seed-desc{ font-size:12.5px; color: var(--ink-soft); margin-bottom:10px; line-height:1.4;}
+  .seed-banner button{
+    background: var(--maroon); color:#fff; border:none; border-radius:10px; padding:10px 14px;
+    font-weight:700; font-size:13.5px; cursor:pointer;
+  }
+  .seed-banner button:disabled{ opacity:.6; }
+
+  /* ---------- Item list ---------- */
+  .section-label{
+    padding: 14px 16px 6px; font-size: 12.5px; font-weight:700; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .category-label{
+    padding: 14px 16px 4px; font-size: 13px; font-weight:800; color: var(--maroon-dark);
+    font-family:'Baloo 2',sans-serif;
+  }
+  .empty-state{
+    margin: 20px 16px; padding: 30px 18px; text-align:center; background: var(--card);
+    border: 1px dashed var(--line); border-radius: var(--radius); color: var(--ink-soft);
+  }
+  .empty-state .big{ font-size: 34px; margin-bottom: 6px;}
+
+  .item-list{ padding: 4px 12px 8px; display:flex; flex-direction:column; gap:10px;}
+  .item-card{
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 12px 14px; display:flex; align-items:center; gap:12px;
+  }
+  .item-qty-pill{
+    min-width: 56px; text-align:center; background: #FBF1DC; color: var(--turmeric-dark);
+    border-radius: 10px; padding: 8px 6px; font-weight:800; font-family:'Baloo 2', sans-serif;
+    font-size: 15px; line-height:1.1;
+  }
+  .item-qty-pill.low{ background:#FBE4E1; color: var(--danger); }
+  .item-qty-pill .unit{ display:block; font-size: 10px; font-weight:600; color: var(--ink-soft); text-transform: lowercase; }
+  .item-main{ flex:1; min-width:0; }
+  .item-name{ font-weight:700; font-size:15px; color:var(--ink);}
+  .item-meta{ font-size:12px; color:var(--ink-soft); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap;}
+  .item-meta .cat-tag{ background:#F3E9DA; padding:1px 7px; border-radius: 8px; font-weight:600; }
+  .item-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    width:36px;height:36px;border-radius:10px; border:1px solid var(--line); background:#fff;
+    font-size:16px; cursor:pointer; display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn.edit{ color: var(--maroon); }
+
+  /* ---------- Add/Edit modal ---------- */
+  .overlay{ position:fixed; inset:0; background:rgba(30,20,10,0.45); display:none; align-items:flex-end; justify-content:center; z-index:50; }
+  .overlay.open{ display:flex; }
+  .sheet{
+    background: var(--cream); width:100%; max-width: 520px; border-radius: 20px 20px 0 0;
+    padding: 18px 18px 22px; max-height: 88vh; overflow-y:auto; animation: slideUp .18s ease-out;
+  }
+  @keyframes slideUp{ from{ transform: translateY(24px); opacity:0.4;} to{ transform:translateY(0); opacity:1;} }
+  .sheet h2{ margin: 4px 0 14px; font-size: 19px; color: var(--maroon-dark); }
+  .field{ margin-bottom: 12px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:5px; }
+  .field input, .field select, .field textarea{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:11px 12px;
+    font-size:15px; font-family:'Inter',sans-serif; background:#fff; color:var(--ink);
+  }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+  .sheet-actions{ display:flex; gap:10px; margin-top:16px; }
+  .btn{ flex:1; border:none; border-radius:12px; padding:13px; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn.primary{ background: var(--maroon); color:#fff; }
+  .btn.ghost{ background: #fff; color: var(--ink-soft); border:1px solid var(--line); }
+  .btn.danger{ background: var(--danger); color:#fff; }
+  .btn:disabled{ opacity:.6; }
+
+  /* ---------- Activity log drawer ---------- */
+  .drawer{
+    position:fixed; top:0; right:0; bottom:0; width: 100%; max-width: 400px; background: var(--cream);
+    box-shadow: -6px 0 24px rgba(0,0,0,0.18); transform: translateX(100%); transition: transform .22s ease;
+    z-index: 60; display:flex; flex-direction:column;
+  }
+  .drawer.open{ transform: translateX(0); }
+  .drawer-header{ background: var(--maroon); color:#fff; padding: 16px 16px 14px; display:flex; align-items:center; justify-content:space-between; }
+  .drawer-header h2{ margin:0; font-size:17px; }
+  .drawer-header button{ background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px;height:32px; border-radius:8px; font-size:16px; cursor:pointer; }
+  .drawer-body{ flex:1; overflow-y:auto; padding: 10px 14px 20px; }
+  .log-empty{ text-align:center; color:var(--ink-soft); margin-top:40px; }
+  .log-item{ background:#fff; border-radius:12px; padding:11px 12px; margin-bottom:9px; box-shadow: var(--shadow); border-left: 4px solid var(--line); }
+  .log-item.is-new{ border-left-color: var(--turmeric); background: #FFFBF0; }
+  .log-item .log-top{ display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--ink-soft); margin-bottom:3px;}
+  .log-item .log-new-tag{ background: var(--turmeric); color:var(--ink); font-weight:800; font-size:9.5px; padding: 1px 6px; border-radius:7px; letter-spacing:0.03em; }
+  .log-item .log-section-tag{ background:#EFE3CE; color:var(--ink-soft); font-weight:700; font-size:9.5px; padding:1px 6px; border-radius:7px; margin-right:5px;}
+  .log-item .log-text{ font-size:13.5px; line-height:1.4; }
+  .log-item .log-text b{ color: var(--maroon-dark); }
+  .log-action-add{ color: var(--good); font-weight:700; }
+  .log-action-update{ color: var(--warn); font-weight:700; }
+  .log-action-delete{ color: var(--danger); font-weight:700; }
+
+  .overlay-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:55; display:none; }
+  .overlay-backdrop.open{ display:block; }
+
+  .toast{
+    position:fixed; bottom:14px; left:50%; transform:translateX(-50%); background: var(--ink); color:#fff;
+    font-size:13px; padding:10px 16px; border-radius:20px; box-shadow: var(--shadow); display:none; z-index:80;
+    max-width: 86%; text-align:center;
+  }
+  .toast.show{ display:block; }
+
+  /* ---------- History tab ---------- */
+  .date-picker-bar{
+    padding: 14px 16px 4px; display:flex; gap:8px; align-items:center;
+  }
+  .date-input-box{
+    flex:1; background: var(--card); border:1px solid var(--line); border-radius:12px;
+    padding: 10px 12px; display:flex; align-items:center; gap:8px; box-shadow: var(--shadow);
+  }
+  .date-input-box span{ font-size:16px; }
+  .date-input-box input[type="date"]{
+    flex:1; border:none; outline:none; background:transparent; font-size:14px; color:var(--ink);
+    font-family:'Inter',sans-serif; -webkit-appearance:none; appearance:none; min-width:0;
+  }
+  .date-input-box input[type="date"]::-webkit-calendar-picker-indicator{
+    opacity: 0.65;
+  }
+  .chip-btn{
+    background: var(--maroon); color:#fff; border:none; border-radius:12px;
+    padding: 10px 14px; font-weight:700; font-size:13px; cursor:pointer; box-shadow: var(--shadow);
+  }
+  .hist-card{
+    background:#fff; border-radius:12px; padding:11px 12px; margin: 0 12px 9px; box-shadow: var(--shadow);
+    border-left: 4px solid var(--line);
+  }
+  .hist-card .hist-top{ display:flex; justify-content:space-between; font-size:12px; color:var(--ink-soft); margin-bottom:3px;}
+  .hist-card .hist-text{ font-size:13.5px; line-height:1.4; }
+  .hist-card .hist-text b{ color: var(--maroon-dark); }
+  .hist-card .hist-section-tag{ background:#EFE3CE; color:var(--ink-soft); font-weight:700; font-size:9.5px; padding:1px 6px; border-radius:7px; margin-right:5px;}
+
+  /* ---------- Reorder tab ---------- */
+  .reorder-card{
+    background:#fff; border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 12px 14px; margin: 0 12px 10px;
+  }
+  .reorder-card .reorder-name{ font-weight:700; font-size:14.5px; color:var(--ink); margin-bottom:8px; }
+  .reorder-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:8px 14px; }
+  .reorder-grid .ro-item{ font-size:12px; }
+  .reorder-grid .ro-item .ro-label{ color:var(--ink-soft); display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px;}
+  .reorder-grid .ro-item .ro-value{ font-weight:700; color:var(--ink); font-size:13.5px;}
+  .reorder-grid .ro-item.overdue .ro-value{ color: var(--danger); }
+  .reorder-grid .ro-item.soon .ro-value{ color: var(--warn); }
+  .reorder-empty-note{ font-size:11.5px; color:var(--ink-soft); text-align:center; padding: 6px 24px 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <div class="emoji">🍽️</div>
+      <div class="brand-text">
+        <div class="title">OneStop DriveIn</div>
+        <div class="subtitle" id="headerSubtitle">Inventory & Pantry</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="bell-btn" id="bellBtn" aria-label="Activity log">
+        🔔
+        <span class="badge" id="bellBadge" style="display:none;">0</span>
+      </button>
+    </div>
+  </div>
+  <div class="sync-status" id="syncStatus">Connecting…</div>
+  <div class="who-row">
+    <label for="whoSelect">I am:</label>
+    <select id="whoSelect">
+      <option value="">Select your name…</option>
+      <option>Sravya</option>
+      <option>Triveni</option>
+      <option>Veerababu</option>
+      <option>Raju</option>
+      <option>Laxman</option>
+      <option>Venkatesh</option>
+      <option>Other</option>
+    </select>
+  </div>
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabInventoryBtn">📦 Stock</button>
+    <button class="tab-btn" id="tabPantryBtn">🥫 Pantry</button>
+    <button class="tab-btn" id="tabHistoryBtn">📅 History</button>
+    <button class="tab-btn" id="tabReorderBtn">🔁 Reorder</button>
+  </div>
+</header>
+
+<div id="stockView">
+  <div class="toolbar">
+    <div class="search-box">
+      <span>🔎</span>
+      <input type="text" id="searchInput" placeholder="Search items…">
+    </div>
+    <button class="cal-toggle-btn" id="stockCalToggleBtn" aria-label="Filter by date">📅</button>
+    <button class="add-btn" id="openAddBtn" aria-label="Add item">＋</button>
+  </div>
+  <div class="stock-date-bar" id="stockDateBar" style="display:none;">
+    <div class="date-input-box">
+      <span>📅</span>
+      <input type="date" id="stockDateInput">
+    </div>
+    <button id="stockDateClearBtn" class="chip-btn ghost">Clear</button>
+  </div>
+  <div class="fab-note" id="fabNote">Tap ＋ to add an item · Tap ✏️ on any item to edit or remove it</div>
+
+  <div class="seed-banner" id="seedBanner">
+    <div class="seed-title">📋 Set up your standard inventory list</div>
+    <div class="seed-desc">Load the 86 items from your monthly inventory sheet (with their categories and units) so you can start tracking stock straight away. This only needs to be done once.</div>
+    <button id="seedBtn">Load standard list</button>
+  </div>
+
+  <div class="seed-banner" id="excelImportBanner">
+    <div class="seed-title">📥 Import your July data from Excel</div>
+    <div class="seed-desc">Pull in the purchase entries already recorded in your monthly Excel sheet (44 entries across July) so they show up in History and Reorder here too. This only needs to be done once. <b>Note:</b> your Excel sheet tracked purchases, not day-to-day usage, so after importing it's worth doing a quick physical count to correct each item's current quantity.</div>
+    <button id="excelImportBtn">Import Excel history</button>
+  </div>
+
+  <div class="section-label" id="listLabel">Items</div>
+  <div class="filter-banner" id="filterBanner" style="display:none;"></div>
+  <div id="listWrap">
+    <div class="empty-state" id="emptyState">
+      <div class="big">📦</div>
+      Nothing here yet.<br>Tap the ＋ button to add your first item.
+    </div>
+    <div id="itemGroups"></div>
+  </div>
+</div>
+
+<div id="historyView" style="display:none;">
+  <div class="date-picker-bar">
+    <div class="date-input-box">
+      <span>📅</span>
+      <input type="date" id="historyDateInput">
+    </div>
+    <button id="historyTodayBtn" class="chip-btn">Today</button>
+  </div>
+  <div class="section-label" id="historyLabel">Activity on this date</div>
+  <div id="historyList">
+    <div class="empty-state" id="historyEmpty">
+      <div class="big">🗓️</div>
+      No activity logged for this date.
+    </div>
+  </div>
+</div>
+
+<div id="reorderView" style="display:none;">
+  <div class="section-label">Reorder Summary — based on stock increases you've logged</div>
+  <div id="reorderList"></div>
+</div>
+
+<!-- Add / Edit sheet -->
+<div class="overlay-backdrop" id="sheetBackdrop"></div>
+<div class="overlay" id="sheetOverlay">
+  <div class="sheet">
+    <h2 id="sheetTitle">Add item</h2>
+    <input type="hidden" id="editingId">
+    <div class="field">
+      <label>Item name</label>
+      <input type="text" id="fName" placeholder="e.g. Basmati Rice">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Quantity</label>
+        <input type="number" step="0.01" id="fQty" placeholder="e.g. 25">
+      </div>
+      <div class="field">
+        <label>Unit</label>
+        <input type="text" id="fUnit" placeholder="kg / pcs / L / packets">
+      </div>
+    </div>
+    <div class="field" id="reasonFieldWrap" style="display:none;">
+      <label id="reasonLabel">Reason for quantity change (required)</label>
+      <input type="text" id="fReason" placeholder="e.g. used for dinner service, new delivery, wastage">
+    </div>
+    <div class="field">
+      <label>Category (optional)</label>
+      <input type="text" id="fCategory" placeholder="e.g. Vegetables, Spices, Cleaning">
+    </div>
+    <div class="field">
+      <label>Low-stock alert level (optional)</label>
+      <input type="number" step="0.01" id="fLowAt" placeholder="e.g. warn me under 5 kg">
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="fNotes" rows="2" placeholder="e.g. new sack opened, near expiry…"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn ghost" id="cancelBtn">Cancel</button>
+      <button class="btn danger" id="deleteBtn" style="display:none;">Delete</button>
+      <button class="btn primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Activity log drawer -->
+<div class="overlay-backdrop" id="logBackdrop"></div>
+<div class="drawer" id="logDrawer">
+  <div class="drawer-header">
+    <h2>🔔 Recent activity</h2>
+    <button id="closeLogBtn">✕</button>
+  </div>
+  <div class="drawer-body" id="logBody">
+    <div class="log-empty">No activity yet.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================= Standard item list (86 items from the July inventory sheet) =======================
+const STANDARD_ITEMS = [
+{name:"🍗 Chicken Boneless",unit:"kg",category:"🥩 Meat & Seafood"},
+{name:"🍗 Chicken With Bone",unit:"kg",category:"🥩 Meat & Seafood"},
+{name:"🍗 Chicken Leg",unit:"pcs",category:"🥩 Meat & Seafood"},
+{name:"🍖 Chicken Other",unit:"pcs",category:"🥩 Meat & Seafood"},
+{name:"🐐 Mutton",unit:"kg",category:"🥩 Meat & Seafood"},
+{name:"🐟 Fish",unit:"kg",category:"🥩 Meat & Seafood"},
+{name:"🥚 Eggs",unit:"pcs",category:"🥩 Meat & Seafood"},
+{name:"🥬 Mixed Vegetables",unit:"kg",category:"🥬 Vegetables"},
+{name:"🧅 Onions",unit:"kg",category:"🥬 Vegetables"},
+{name:"🍅 Tomatoes",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥔 Potato",unit:"kg",category:"🥬 Vegetables"},
+{name:"🧄 Garlic",unit:"kg",category:"🥬 Vegetables"},
+{name:"🫚 Ginger",unit:"kg",category:"🥬 Vegetables"},
+{name:"🍆 Brinjal",unit:"kg",category:"🥬 Vegetables"},
+{name:"🌶️ Green Chilli",unit:"kg",category:"🥬 Vegetables"},
+{name:"🫑 Capsicum",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥒 Cucumber",unit:"kg",category:"🥬 Vegetables"},
+{name:"🎃 Pumpkin",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥬 Cabbage",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥦 Cauliflower",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥕 Carrot",unit:"kg",category:"🥬 Vegetables"},
+{name:"🫘 Beans",unit:"kg",category:"🥬 Vegetables"},
+{name:"🍈 Bottle Gourd / Sorakaya",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥒 Ridge Gourd / Beerakaya",unit:"kg",category:"🥬 Vegetables"},
+{name:"🌿 Drumstick / Munagakaya",unit:"kg",category:"🥬 Vegetables"},
+{name:"🍠 Raw Banana / Aratikaya",unit:"kg",category:"🥬 Vegetables"},
+{name:"🥗 Spinach / Palakura",unit:"kg",category:"🥬 Vegetables"},
+{name:"🟣 Beetroot",unit:"kg",category:"🥬 Vegetables"},
+{name:"🍋 Lemon",unit:"pcs",category:"🥬 Vegetables"},
+{name:"⭐ Star Fruit",unit:"kg",category:"🥬 Vegetables"},
+{name:"🍚 Rice",unit:"kg",category:"🌾 Grains, Rice & Flours"},
+{name:"🍚 Basmati Rice",unit:"kg",category:"🌾 Grains, Rice & Flours"},
+{name:"🌽 Corn Flour",unit:"kg",category:"🌾 Grains, Rice & Flours"},
+{name:"🌾 Maida",unit:"kg",category:"🌾 Grains, Rice & Flours"},
+{name:"🌾 Senagapindi / Besan",unit:"kg",category:"🌾 Grains, Rice & Flours"},
+{name:"🫘 Moong Daal Yellow",unit:"kg",category:"🫘 Dals & Pulses"},
+{name:"🫘 Moong Daal White",unit:"kg",category:"🫘 Dals & Pulses"},
+{name:"🫘 Toor Daal",unit:"kg",category:"🫘 Dals & Pulses"},
+{name:"🫘 Chana Daal",unit:"kg",category:"🫘 Dals & Pulses"},
+{name:"🥜 Peanuts",unit:"kg",category:"🫘 Dals & Pulses"},
+{name:"🧀 Paneer",unit:"kg",category:"🥛 Dairy"},
+{name:"🧈 Ghee",unit:"kg",category:"🥛 Dairy"},
+{name:"🥛 Curd",unit:"kg",category:"🥛 Dairy"},
+{name:"🥛 Milk Cream",unit:"kg",category:"🥛 Dairy"},
+{name:"🧈 Butter",unit:"kg",category:"🥛 Dairy"},
+{name:"🥜 Kaju / Cashew",unit:"kg",category:"🥜 Dry Fruits & Nuts"},
+{name:"🥜 Split Kaju / Cashew Pieces",unit:"kg",category:"🥜 Dry Fruits & Nuts"},
+{name:"🍉 Watermelon Seeds",unit:"kg",category:"🥜 Dry Fruits & Nuts"},
+{name:"🧂 Salt",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🧂 Tasting Salt / Ajinomoto",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🌶️ Chilli Powder",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🥥 Coconut Powder",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🟡 Turmeric Powder",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🍗 Chicken Masala",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🍛 Sambar Masala",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🌿 Ajwain Seeds",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🌿 Fennel Seeds / Saunf",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🧪 Asafoetida / Hing",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🌿 Kasuri Methi",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🍃 Curry Leaves / Popu Items",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🧄 Ginger Garlic Paste",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🌰 Nuvvulu / Sesame Seeds",unit:"kg",category:"🌶️ Spices & Masalas"},
+{name:"🌶️ Chilli Sauce",unit:"bottle",category:"🍅 Sauces & Condiments"},
+{name:"🍅 Tomato Sauce",unit:"bottle",category:"🍅 Sauces & Condiments"},
+{name:"🌰 Tamarind",unit:"kg",category:"🍅 Sauces & Condiments"},
+{name:"🍯 Bellam / Jaggery",unit:"kg",category:"🍅 Sauces & Condiments"},
+{name:"🍬 Sugar",unit:"kg",category:"🍅 Sauces & Condiments"},
+{name:"🛢 Cooking Oil",unit:"L",category:"🛢 Oil"},
+{name:"🍟 Chips",unit:"packets",category:"🍟 Snacks"},
+{name:"🍟 Favrita Frozen Snacks",unit:"kg",category:"🍟 Snacks"},
+{name:"💧 Water Bottle",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥤 Coca-Cola",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥤 Sprite",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥤 Fanta",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥤 Thums Up",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥤 Pepsi",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥭 Maaza",unit:"pcs",category:"🥤 Beverage Inventory"},
+{name:"🥤 Limca",unit:"250ml",category:"🥤 Beverage Inventory"},
+{name:"🥤 Jeera",unit:"250ml",category:"🥤 Beverage Inventory"},
+{name:"🍨 Badam Milk",unit:"cup",category:"🥤 Beverage Inventory"},
+{name:"🧴 Surf / Detergent Powder",unit:"kg",category:"🧴 Cleaning & Household Supplies"},
+{name:"🌸 Odonil / Air Freshener",unit:"pcs",category:"🧴 Cleaning & Household Supplies"},
+{name:"🧴 Phenyl / Phynoil",unit:"L",category:"🧴 Cleaning & Household Supplies"},
+{name:"🧺 Comfort / Fabric Softener",unit:"L",category:"🧴 Cleaning & Household Supplies"},
+{name:"🧻 Paper Napkins / Tissues",unit:"packets",category:"🧴 Cleaning & Household Supplies"},
+{name:"🧽 Bath Loofah",unit:"pcs",category:"🧴 Cleaning & Household Supplies"},
+];
+
+// ======================= July purchase history, pulled from the Excel inventory sheet =======================
+// Each entry is a quantity RECEIVED on that date (a purchase), as originally logged in the daily Excel tabs.
+const EXCEL_HISTORY = [
+{date:"2026-07-10",name:"⭐ Star Fruit",qty:0.5},
+{date:"2026-07-10",name:"🌰 Nuvvulu / Sesame Seeds",qty:3.0},
+{date:"2026-07-07",name:"🌶️ Green Chilli",qty:6.0},
+{date:"2026-07-10",name:"🌶️ Green Chilli",qty:5.0},
+{date:"2026-07-10",name:"🌾 Maida",qty:2.0},
+{date:"2026-07-05",name:"🌿 Fennel Seeds / Saunf",qty:0.5},
+{date:"2026-07-06",name:"🍅 Tomatoes",qty:5},
+{date:"2026-07-10",name:"🍅 Tomatoes",qty:5.0},
+{date:"2026-07-10",name:"🍆 Brinjal",qty:2.0},
+{date:"2026-07-06",name:"🍋 Lemon",qty:200},
+{date:"2026-07-03",name:"🍗 Chicken Boneless",qty:1.5},
+{date:"2026-07-04",name:"🍗 Chicken Boneless",qty:3.0},
+{date:"2026-07-03",name:"🍗 Chicken With Bone",qty:4.9},
+{date:"2026-07-04",name:"🍗 Chicken With Bone",qty:8.5},
+{date:"2026-07-06",name:"🍚 Basmati Rice",qty:30},
+{date:"2026-07-10",name:"🍚 Basmati Rice",qty:2.0},
+{date:"2026-07-05",name:"🍟 Favrita Frozen Snacks",qty:2.5},
+{date:"2026-07-06",name:"🐐 Mutton",qty:3},
+{date:"2026-07-05",name:"🐟 Fish",qty:4.0},
+{date:"2026-07-10",name:"🛢 Cooking Oil",qty:2.0},
+{date:"2026-07-10",name:"🥒 Cucumber",qty:5.0},
+{date:"2026-07-10",name:"🥔 Potato",qty:10.0},
+{date:"2026-07-10",name:"🥕 Carrot",qty:5.0},
+{date:"2026-07-04",name:"🥚 Eggs",qty:60.0},
+{date:"2026-07-06",name:"🥚 Eggs",qty:90},
+{date:"2026-07-06",name:"🥛 Curd",qty:2},
+{date:"2026-07-10",name:"🥛 Curd",qty:20.0},
+{date:"2026-07-10",name:"🥛 Milk Cream",qty:3.0},
+{date:"2026-07-10",name:"🥜 Peanuts",qty:4.0},
+{date:"2026-07-10",name:"🥥 Coconut Powder",qty:1.0},
+{date:"2026-07-10",name:"🧀 Paneer",qty:8.0},
+{date:"2026-07-10",name:"🧂 Tasting Salt / Ajinomoto",qty:1.0},
+{date:"2026-07-06",name:"🧄 Garlic",qty:2},
+{date:"2026-07-10",name:"🧄 Garlic",qty:3.0},
+{date:"2026-07-05",name:"🧅 Onions",qty:5.0},
+{date:"2026-07-06",name:"🧅 Onions",qty:56},
+{date:"2026-07-10",name:"🧅 Onions",qty:64.0},
+{date:"2026-07-10",name:"🧈 Butter",qty:1.0},
+{date:"2026-07-04",name:"🧻 Paper Napkins / Tissues",qty:1.0},
+{date:"2026-07-05",name:"🧻 Paper Napkins / Tissues",qty:3.0},
+{date:"2026-07-05",name:"🧽 Bath Loofah",qty:1.0},
+{date:"2026-07-10",name:"🫑 Capsicum",qty:10.0},
+{date:"2026-07-10",name:"🫘 Toor Daal",qty:5.0},
+{date:"2026-07-10",name:"🫚 Ginger",qty:5.0},
+];
+
+
+(function(){
+  // ---- Firebase (same project/pattern as your attendance & duty trackers) ----
+  // This talks directly to your existing Firebase Realtime Database over
+  // plain REST calls, the same way attendance-tracker.html does — no SDK,
+  // no config to paste in. It uses its own path ("onestop-inventory-app")
+  // so it never touches your HR or duty tracker data.
+  const FIREBASE_URL = 'https://attendance-and-salary-tr-20681-default-rtdb.asia-southeast1.firebasedatabase.app';
+  const FIREBASE_PATH = 'onestop-inventory-app';
+  const STORAGE_KEY = 'onestop_inventory_state_v1';
+  const LS_LAST_SEEN = 'appLastSeen';
+  const LS_WHO = 'appWho';
+
+  function withTimeout(promise, ms){
+    return Promise.race([
+      promise,
+      new Promise((_,reject)=> setTimeout(()=>reject(new Error('timeout')), ms))
+    ]);
+  }
+  async function firebaseGet(){
+    const res = await withTimeout(fetch(FIREBASE_URL+'/'+FIREBASE_PATH+'.json'), 6000);
+    if(!res.ok) throw new Error('firebase get failed: '+res.status);
+    return await res.json();
+  }
+  async function firebaseSet(data){
+    const res = await withTimeout(fetch(FIREBASE_URL+'/'+FIREBASE_PATH+'.json', {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    }), 6000);
+    if(!res.ok) throw new Error('firebase set failed: '+res.status);
+    return true;
+  }
+
+  function genId(){
+    return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+  }
+
+  let state = { inventoryItems:{}, pantryItems:{}, activityLog:{}, lastUpdated:0 };
+  let activeTab = 'inventory'; // 'inventory' | 'pantry'
+  let searchTerm = '';
+  let stockFilterDate = '';
+
+  const SECTION_LABEL = { inventory: 'Inventory', pantry: 'Pantry' };
+
+  const els = {
+    whoSelect: document.getElementById('whoSelect'),
+    tabInventoryBtn: document.getElementById('tabInventoryBtn'),
+    tabPantryBtn: document.getElementById('tabPantryBtn'),
+    tabHistoryBtn: document.getElementById('tabHistoryBtn'),
+    tabReorderBtn: document.getElementById('tabReorderBtn'),
+    stockView: document.getElementById('stockView'),
+    historyView: document.getElementById('historyView'),
+    reorderView: document.getElementById('reorderView'),
+    historyDateInput: document.getElementById('historyDateInput'),
+    historyTodayBtn: document.getElementById('historyTodayBtn'),
+    historyList: document.getElementById('historyList'),
+    historyEmpty: document.getElementById('historyEmpty'),
+    historyLabel: document.getElementById('historyLabel'),
+    reorderList: document.getElementById('reorderList'),
+    headerSubtitle: document.getElementById('headerSubtitle'),
+    syncStatus: document.getElementById('syncStatus'),
+    searchInput: document.getElementById('searchInput'),
+    openAddBtn: document.getElementById('openAddBtn'),
+    fabNote: document.getElementById('fabNote'),
+    seedBanner: document.getElementById('seedBanner'),
+    seedBtn: document.getElementById('seedBtn'),
+    excelImportBanner: document.getElementById('excelImportBanner'),
+    excelImportBtn: document.getElementById('excelImportBtn'),
+    stockCalToggleBtn: document.getElementById('stockCalToggleBtn'),
+    stockDateBar: document.getElementById('stockDateBar'),
+    stockDateInput: document.getElementById('stockDateInput'),
+    stockDateClearBtn: document.getElementById('stockDateClearBtn'),
+    itemGroups: document.getElementById('itemGroups'),
+    emptyState: document.getElementById('emptyState'),
+    listLabel: document.getElementById('listLabel'),
+    filterBanner: document.getElementById('filterBanner'),
+    sheetOverlay: document.getElementById('sheetOverlay'),
+    sheetBackdrop: document.getElementById('sheetBackdrop'),
+    sheetTitle: document.getElementById('sheetTitle'),
+    editingId: document.getElementById('editingId'),
+    fName: document.getElementById('fName'),
+    fQty: document.getElementById('fQty'),
+    fUnit: document.getElementById('fUnit'),
+    fCategory: document.getElementById('fCategory'),
+    fLowAt: document.getElementById('fLowAt'),
+    fNotes: document.getElementById('fNotes'),
+    reasonFieldWrap: document.getElementById('reasonFieldWrap'),
+    fReason: document.getElementById('fReason'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    deleteBtn: document.getElementById('deleteBtn'),
+    saveBtn: document.getElementById('saveBtn'),
+    bellBtn: document.getElementById('bellBtn'),
+    bellBadge: document.getElementById('bellBadge'),
+    logDrawer: document.getElementById('logDrawer'),
+    logBackdrop: document.getElementById('logBackdrop'),
+    closeLogBtn: document.getElementById('closeLogBtn'),
+    logBody: document.getElementById('logBody'),
+    toast: document.getElementById('toast'),
+  };
+
+  function showToast(msg, ms){
+    els.toast.textContent = msg;
+    els.toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> els.toast.classList.remove('show'), ms || 3500);
+  }
+
+  // ---------- Who am I ----------
+  els.whoSelect.value = localStorage.getItem(LS_WHO) || '';
+  els.whoSelect.addEventListener('change', () => {
+    localStorage.setItem(LS_WHO, els.whoSelect.value);
+  });
+  function currentUser(){ return els.whoSelect.value || 'Someone'; }
+
+  // ---------- Sync status ----------
+  let lastSyncTime = null;
+  let lastSyncOk = false;
+  function markSynced(ok){
+    lastSyncOk = ok;
+    lastSyncTime = Date.now();
+    renderSyncStatus();
+  }
+  function renderSyncStatus(){
+    if(!lastSyncTime){ els.syncStatus.textContent = 'Connecting…'; els.syncStatus.className = 'sync-status'; return; }
+    const secs = Math.floor((Date.now()-lastSyncTime)/1000);
+    const when = secs<5 ? 'just now' : secs<60 ? secs+'s ago' : Math.floor(secs/60)+'m ago';
+    els.syncStatus.textContent = (lastSyncOk ? 'Synced ' : 'Offline – saved on this phone ') + when;
+    els.syncStatus.className = 'sync-status ' + (lastSyncOk ? 'ok' : 'bad');
+  }
+  setInterval(renderSyncStatus, 1000);
+
+  // ---------- State load / save / poll ----------
+  function normalizeState(){
+    state.inventoryItems = state.inventoryItems || {};
+    state.pantryItems = state.pantryItems || {};
+    state.activityLog = state.activityLog || {};
+  }
+
+  async function loadState(){
+    let remote = null;
+    try{
+      remote = await firebaseGet();
+      markSynced(true);
+    }catch(e){
+      console.error('firebase load failed, using local cache', e);
+      markSynced(false);
+    }
+    if(remote){
+      state = remote;
+    } else {
+      let loaded = null;
+      try{
+        const v = localStorage.getItem(STORAGE_KEY);
+        if(v) loaded = JSON.parse(v);
+      }catch(e){ loaded = null; }
+      state = loaded || { inventoryItems:{}, pantryItems:{}, activityLog:{}, lastUpdated:0 };
+    }
+    normalizeState();
+    renderAll();
+  }
+
+  async function saveState(){
+    state.lastUpdated = Date.now();
+    try{
+      await firebaseSet(state);
+      markSynced(true);
+    }catch(e){
+      console.error('firebase save failed (kept locally)', e);
+      markSynced(false);
+      showToast('⚠️ Could not sync — saved on this phone only, will retry.');
+    }
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){ /* ignore */ }
+  }
+
+  function startSync(){
+    setInterval(async ()=>{
+      const active = document.activeElement;
+      const isEditing = active && ['INPUT','TEXTAREA','SELECT'].includes(active.tagName);
+      const sheetOpen = els.sheetOverlay.classList.contains('open');
+      if (isEditing || sheetOpen) return;
+      try{
+        const remote = await firebaseGet();
+        markSynced(true);
+        if (remote && remote.lastUpdated && (!state.lastUpdated || remote.lastUpdated > state.lastUpdated)) {
+          state = remote;
+          normalizeState();
+          renderAll();
+        }
+      }catch(e){ markSynced(false); }
+    }, 5000);
+  }
+
+  function renderAll(){
+    updateSeedBannerVisibility();
+    updateExcelImportBannerVisibility();
+    renderItems();
+    renderLog();
+    if (currentView === 'history') renderHistory();
+    if (currentView === 'reorder') renderReorder();
+  }
+
+  // ---------- Tabs ----------
+  let currentView = 'inventory'; // 'inventory' | 'pantry' | 'history' | 'reorder'
+  function setTab(tab){
+    currentView = tab;
+    els.tabInventoryBtn.classList.toggle('active', tab==='inventory');
+    els.tabPantryBtn.classList.toggle('active', tab==='pantry');
+    els.tabHistoryBtn.classList.toggle('active', tab==='history');
+    els.tabReorderBtn.classList.toggle('active', tab==='reorder');
+
+    els.stockView.style.display = (tab==='inventory'||tab==='pantry') ? 'block' : 'none';
+    els.historyView.style.display = tab==='history' ? 'block' : 'none';
+    els.reorderView.style.display = tab==='reorder' ? 'block' : 'none';
+
+    // clear any active date filter when switching tabs, to avoid confusion
+    stockFilterDate = '';
+    els.stockDateInput.value = '';
+    els.stockDateBar.style.display = 'none';
+    els.stockCalToggleBtn.classList.remove('active');
+
+    if (tab === 'inventory' || tab === 'pantry') {
+      activeTab = tab;
+      els.headerSubtitle.textContent = tab === 'inventory' ? 'Full stock inventory' : 'Pantry stock';
+      els.searchInput.value = '';
+      searchTerm = '';
+      els.fabNote.textContent = tab === 'inventory'
+        ? 'Tap ＋ to add an item · Tap ✏️ to edit or remove it'
+        : 'Tap ＋ to add a pantry item · Tap ✏️ to edit or remove it';
+      updateSeedBannerVisibility();
+      updateExcelImportBannerVisibility();
+      renderItems();
+    } else if (tab === 'history') {
+      els.headerSubtitle.textContent = 'Activity history';
+      if (!els.historyDateInput.value) els.historyDateInput.value = todayStr();
+      renderHistory();
+    } else if (tab === 'reorder') {
+      els.headerSubtitle.textContent = 'Reorder summary';
+      renderReorder();
+    }
+  }
+  els.tabInventoryBtn.addEventListener('click', () => setTab('inventory'));
+  els.tabPantryBtn.addEventListener('click', () => setTab('pantry'));
+  els.tabHistoryBtn.addEventListener('click', () => setTab('history'));
+  els.tabReorderBtn.addEventListener('click', () => setTab('reorder'));
+
+  function activeItemsMap(){ return activeTab === 'inventory' ? state.inventoryItems : state.pantryItems; }
+
+  // ---------- Seed banner ----------
+  function updateSeedBannerVisibility(){
+    const isEmpty = Object.keys(state.inventoryItems || {}).length === 0;
+    els.seedBanner.classList.toggle('show', activeTab === 'inventory' && isEmpty);
+  }
+  els.seedBtn.addEventListener('click', async () => {
+    if (!confirm(`Load the standard ${STANDARD_ITEMS.length}-item inventory list? You can edit or remove any item afterwards.`)) return;
+    els.seedBtn.disabled = true;
+    els.seedBtn.textContent = 'Loading…';
+    try{
+      for (const it of STANDARD_ITEMS) {
+        const id = genId();
+        state.inventoryItems[id] = { name: it.name, category: it.category, unit: it.unit, quantity: null, lowAt: null, notes: '' };
+      }
+      addLogEntry('inventory', 'add', `Standard list (${STANDARD_ITEMS.length} items)`, `loaded by ${currentUser()}`, {});
+      await saveState();
+      renderAll();
+      showToast('✅ Standard list loaded');
+    }catch(e){
+      console.error(e);
+      showToast('⚠️ Something went wrong loading the list — please try again.');
+    }
+    els.seedBtn.disabled = false;
+    els.seedBtn.textContent = 'Load standard list';
+  });
+
+  // ---------- Excel history import ----------
+  function updateExcelImportBannerVisibility(){
+    els.excelImportBanner.classList.toggle('show', activeTab === 'inventory' && !state.excelImportedAt);
+  }
+  els.excelImportBtn.addEventListener('click', async () => {
+    if (!confirm(`Import ${EXCEL_HISTORY.length} purchase entries from your July Excel sheet? This adds them to History and Reorder, and sets each item's quantity to its running July total — worth double-checking with a physical count afterwards.`)) return;
+    els.excelImportBtn.disabled = true;
+    els.excelImportBtn.textContent = 'Importing…';
+    try{
+      const nameToId = {};
+      for (const [id, it] of Object.entries(state.inventoryItems || {})) {
+        nameToId[it.name] = id;
+      }
+      const running = {};
+      const sorted = EXCEL_HISTORY.slice().sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+      for (const ev of sorted) {
+        let id = nameToId[ev.name];
+        if (!id) {
+          const std = STANDARD_ITEMS.find(s => s.name === ev.name);
+          id = genId();
+          state.inventoryItems[id] = { name: ev.name, category: std ? std.category : '', unit: std ? std.unit : '', quantity: 0, lowAt: null, notes: '' };
+          nameToId[ev.name] = id;
+        }
+        const item = state.inventoryItems[id];
+        const before = running[ev.name] != null ? running[ev.name] : (item.quantity || 0);
+        const after = before + ev.qty;
+        running[ev.name] = after;
+        const ts = new Date(ev.date + 'T12:00:00').getTime();
+        const logId = genId();
+        state.activityLog[logId] = {
+          section: 'inventory', action: 'update', itemName: ev.name,
+          detail: `updated by Excel import — qty ${before} ${item.unit||''} → ${after} ${item.unit||''} · Reason: purchase recorded in July Excel sheet`,
+          category: item.category, beforeQty: before, afterQty: after, unit: item.unit,
+          reason: 'Imported from July Excel sheet', user: 'Excel import', ts
+        };
+      }
+      for (const [name, total] of Object.entries(running)) {
+        const id = nameToId[name];
+        if (id) state.inventoryItems[id].quantity = total;
+      }
+      trimLog();
+      state.excelImportedAt = Date.now();
+      await saveState();
+      renderAll();
+      showToast('✅ Excel history imported — worth a physical count to confirm quantities');
+    }catch(e){
+      console.error(e);
+      showToast('⚠️ Something went wrong during import — please try again.');
+    }
+    els.excelImportBtn.disabled = false;
+    els.excelImportBtn.textContent = 'Import Excel history';
+  });
+
+  // ---------- Rendering items ----------
+  function renderItems(){
+    const term = searchTerm.trim().toLowerCase();
+    const map = activeItemsMap();
+    let entries = Object.entries(map)
+      .filter(([id, it]) => !term || (it.name||'').toLowerCase().includes(term) || (it.category||'').toLowerCase().includes(term));
+
+    let dayDetailByName = {};
+    if (stockFilterDate) {
+      const touched = new Set();
+      const dayEntries = Object.values(state.activityLog || {})
+        .filter(e => e.section === activeTab && dateStrFromTs(e.ts) === stockFilterDate)
+        .sort((a,b) => (a.ts||0) - (b.ts||0));
+      for (const e of dayEntries) {
+        touched.add(e.itemName);
+        dayDetailByName[e.itemName] = e.detail; // last event of the day wins
+      }
+      entries = entries.filter(([id, it]) => touched.has(it.name));
+      els.filterBanner.style.display = 'flex';
+      els.filterBanner.innerHTML = `<span>📅 Showing items touched on <b>${formatDateLabel(stockFilterDate)}</b> (${entries.length})</span>`;
+    } else {
+      els.filterBanner.style.display = 'none';
+      els.filterBanner.innerHTML = '';
+    }
+
+    els.listLabel.textContent = `${SECTION_LABEL[activeTab]} items (${entries.length})`;
+    els.itemGroups.innerHTML = '';
+    if (!entries.length) {
+      els.emptyState.style.display = 'block';
+      els.emptyState.innerHTML = stockFilterDate
+        ? `<div class="big">🗓️</div>No items were touched on ${formatDateLabel(stockFilterDate)}.`
+        : `<div class="big">📦</div>Nothing here yet.<br>Tap the ＋ button to add your first item.`;
+    } else {
+      els.emptyState.style.display = 'none';
+    }
+
+    if (activeTab === 'inventory') {
+      const groups = {};
+      for (const [id, it] of entries) {
+        const cat = it.category || 'Uncategorised';
+        (groups[cat] = groups[cat] || []).push([id, it]);
+      }
+      const catNames = Object.keys(groups).sort();
+      for (const cat of catNames) {
+        const catLabel = document.createElement('div');
+        catLabel.className = 'category-label';
+        catLabel.textContent = cat;
+        els.itemGroups.appendChild(catLabel);
+        const list = document.createElement('div');
+        list.className = 'item-list';
+        groups[cat].sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+        for (const [id, it] of groups[cat]) list.appendChild(buildItemCard(id, it, dayDetailByName[it.name]));
+        els.itemGroups.appendChild(list);
+      }
+    } else {
+      const list = document.createElement('div');
+      list.className = 'item-list';
+      entries.sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+      for (const [id, it] of entries) list.appendChild(buildItemCard(id, it, dayDetailByName[it.name]));
+      els.itemGroups.appendChild(list);
+    }
+  }
+
+  // ---------- Stock tab date filter ----------
+  els.stockCalToggleBtn.addEventListener('click', () => {
+    const showing = els.stockDateBar.style.display !== 'none';
+    els.stockDateBar.style.display = showing ? 'none' : 'flex';
+    els.stockCalToggleBtn.classList.toggle('active', !showing);
+  });
+  els.stockDateInput.addEventListener('change', () => {
+    stockFilterDate = els.stockDateInput.value;
+    renderItems();
+  });
+  els.stockDateInput.parentElement.addEventListener('click', () => {
+    if (typeof els.stockDateInput.showPicker === 'function') {
+      try { els.stockDateInput.showPicker(); } catch(e) { els.stockDateInput.focus(); }
+    } else {
+      els.stockDateInput.focus();
+    }
+  });
+  els.stockDateClearBtn.addEventListener('click', () => {
+    stockFilterDate = '';
+    els.stockDateInput.value = '';
+    renderItems();
+  });
+
+
+  function buildItemCard(id, it, dayDetail){
+    const isLow = it.lowAt != null && it.quantity != null && Number(it.quantity) <= Number(it.lowAt);
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-qty-pill ${isLow?'low':''}">${escapeHtml(it.quantity ?? '—')}<span class="unit">${escapeHtml(it.unit||'')}</span></div>
+      <div class="item-main">
+        <div class="item-name">${escapeHtml(it.name||'Untitled')}</div>
+        <div class="item-meta">
+          ${isLow ? '<span class="cat-tag" style="background:#FBE4E1;color:#a1332b;">⚠️ low stock</span>' : ''}
+          ${activeTab==='pantry' && it.category ? `<span class="cat-tag">${escapeHtml(it.category)}</span>` : ''}
+          ${it.notes ? `<span>${escapeHtml(it.notes)}</span>` : ''}
+        </div>
+        ${dayDetail ? `<div class="item-meta" style="margin-top:4px;"><span style="color:var(--maroon-dark);font-weight:600;">📅 ${escapeHtml(dayDetail)}</span></div>` : ''}
+      </div>
+      <div class="item-actions">
+        <button class="icon-btn edit" data-id="${id}" aria-label="Edit">✏️</button>
+      </div>
+    `;
+    card.querySelector('.icon-btn.edit').addEventListener('click', () => openEditSheet(id));
+    return card;
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  els.searchInput.addEventListener('input', (e) => { searchTerm = e.target.value; renderItems(); });
+
+  // ---------- Add / Edit sheet ----------
+  function openAddSheet(){
+    els.sheetTitle.textContent = `Add ${activeTab === 'inventory' ? 'inventory' : 'pantry'} item`;
+    els.editingId.value = '';
+    els.fName.value=''; els.fQty.value=''; els.fUnit.value=''; els.fCategory.value=''; els.fLowAt.value=''; els.fNotes.value='';
+    els.reasonFieldWrap.style.display = 'none';
+    els.fReason.value = '';
+    editingOriginalQty = null;
+    els.deleteBtn.style.display = 'none';
+    els.sheetOverlay.classList.add('open');
+    els.sheetBackdrop.classList.add('open');
+  }
+  function openEditSheet(id){
+    const it = activeItemsMap()[id];
+    if (!it) return;
+    els.sheetTitle.textContent = `Edit ${activeTab === 'inventory' ? 'inventory' : 'pantry'} item`;
+    els.editingId.value = id;
+    els.fName.value = it.name || '';
+    els.fQty.value = it.quantity ?? '';
+    els.fUnit.value = it.unit || '';
+    els.fCategory.value = it.category || '';
+    els.fLowAt.value = it.lowAt ?? '';
+    els.fNotes.value = it.notes || '';
+    editingOriginalQty = it.quantity ?? null;
+    els.fReason.value = '';
+    updateReasonVisibility();
+    els.deleteBtn.style.display = 'block';
+    els.sheetOverlay.classList.add('open');
+    els.sheetBackdrop.classList.add('open');
+  }
+  let editingOriginalQty = null;
+  function quantityChanged(){
+    if (!els.editingId.value) return false; // adding new item — not a "change"
+    const newQty = els.fQty.value === '' ? null : Number(els.fQty.value);
+    const oldQty = editingOriginalQty === undefined ? null : editingOriginalQty;
+    return Number(oldQty ?? NaN) !== Number(newQty ?? NaN) && !(oldQty == null && newQty == null);
+  }
+  function updateReasonVisibility(){
+    els.reasonFieldWrap.style.display = quantityChanged() ? 'block' : 'none';
+  }
+  els.fQty.addEventListener('input', updateReasonVisibility);
+  function closeSheet(){
+    els.sheetOverlay.classList.remove('open');
+    els.sheetBackdrop.classList.remove('open');
+  }
+  els.openAddBtn.addEventListener('click', openAddSheet);
+  els.cancelBtn.addEventListener('click', closeSheet);
+  els.sheetBackdrop.addEventListener('click', closeSheet);
+
+  els.saveBtn.addEventListener('click', async () => {
+    const name = els.fName.value.trim();
+    if (!name) { els.fName.focus(); return; }
+    if (quantityChanged() && !els.fReason.value.trim()) {
+      showToast('⚠️ Please enter a reason for the quantity change.');
+      els.fReason.focus();
+      return;
+    }
+    const reason = els.fReason.value.trim();
+    const data = {
+      name,
+      quantity: els.fQty.value === '' ? null : Number(els.fQty.value),
+      unit: els.fUnit.value.trim(),
+      category: els.fCategory.value.trim(),
+      lowAt: els.fLowAt.value === '' ? null : Number(els.fLowAt.value),
+      notes: els.fNotes.value.trim(),
+    };
+    const id = els.editingId.value;
+    els.saveBtn.disabled = true;
+    try{
+      const map = activeItemsMap();
+      if (id) {
+        const before = map[id] || {};
+        map[id] = data;
+        let detail = `updated by ${currentUser()} — qty ${before.quantity ?? '—'} ${before.unit||''} → ${data.quantity ?? '—'} ${data.unit||''}`;
+        if (reason) detail += ` · Reason: ${reason}`;
+        addLogEntry(activeTab, 'update', name, detail, { category: data.category, beforeQty: before.quantity ?? null, afterQty: data.quantity, unit: data.unit, reason });
+      } else {
+        const newId = genId();
+        map[newId] = data;
+        addLogEntry(activeTab, 'add', name, `added by ${currentUser()} — ${data.quantity ?? '—'} ${data.unit||''}`, { category: data.category, beforeQty: null, afterQty: data.quantity, unit: data.unit, reason: '' });
+      }
+      await saveState();
+      renderAll();
+      closeSheet();
+    }catch(e){
+      console.error(e);
+      showToast('⚠️ Could not save — please try again.');
+    }
+    els.saveBtn.disabled = false;
+  });
+
+  els.deleteBtn.addEventListener('click', async () => {
+    const id = els.editingId.value;
+    if (!id) return;
+    const map = activeItemsMap();
+    const it = map[id];
+    if (!confirm(`Remove "${it?.name||'this item'}"?`)) return;
+    try{
+      delete map[id];
+      addLogEntry(activeTab, 'delete', it?.name || 'Item', `removed by ${currentUser()}`, { category: it?.category || '', beforeQty: it?.quantity ?? null, afterQty: null, unit: it?.unit || '' });
+      await saveState();
+      renderAll();
+      closeSheet();
+    }catch(e){
+      console.error(e);
+      showToast('⚠️ Could not delete — please try again.');
+    }
+  });
+
+  // ---------- Activity log ----------
+  function trimLog(){
+    // keep the log from growing without bound — retain the most recent 3000 entries
+    // (roughly years of typical daily activity for a single-location kitchen)
+    const entries = Object.entries(state.activityLog).sort((a,b) => (b[1].ts||0) - (a[1].ts||0));
+    if (entries.length > 3000) {
+      state.activityLog = Object.fromEntries(entries.slice(0, 3000));
+    }
+  }
+  function addLogEntry(section, action, itemName, detail, extra){
+    extra = extra || {};
+    const id = genId();
+    state.activityLog[id] = {
+      section, action, itemName, detail,
+      category: extra.category || '',
+      beforeQty: extra.beforeQty ?? null,
+      afterQty: extra.afterQty ?? null,
+      unit: extra.unit || '',
+      reason: extra.reason || '',
+      user: currentUser(),
+      ts: Date.now()
+    };
+    trimLog();
+  }
+
+  function renderLog(){
+    const lastSeen = Number(localStorage.getItem(LS_LAST_SEEN) || 0);
+    const sorted = Object.values(state.activityLog || {}).sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 150);
+
+    let unseenCount = 0;
+    els.logBody.innerHTML = '';
+    if (!sorted.length) {
+      els.logBody.innerHTML = '<div class="log-empty">No activity yet.</div>';
+    } else {
+      for (const entry of sorted) {
+        const isNew = (entry.ts||0) > lastSeen;
+        if (isNew) unseenCount++;
+        const row = document.createElement('div');
+        row.className = 'log-item' + (isNew ? ' is-new' : '');
+        const actionClass = 'log-action-' + entry.action;
+        const actionLabel = entry.action === 'add' ? 'Added' : entry.action === 'delete' ? 'Removed' : 'Updated';
+        const sectionLabel = SECTION_LABEL[entry.section] || '';
+        row.innerHTML = `
+          <div class="log-top">
+            <span>${timeAgo(entry.ts)}</span>
+            ${isNew ? '<span class="log-new-tag">NEW</span>' : ''}
+          </div>
+          <div class="log-text">
+            ${sectionLabel ? `<span class="log-section-tag">${sectionLabel}</span>` : ''}
+            <span class="${actionClass}">${actionLabel}</span> —
+            <b>${escapeHtml(entry.itemName||'')}</b><br>
+            ${escapeHtml(entry.detail||'')}
+          </div>
+        `;
+        els.logBody.appendChild(row);
+      }
+    }
+    updateBellBadge(unseenCount);
+  }
+
+  function updateBellBadge(count){
+    if (count > 0) {
+      els.bellBadge.style.display = 'flex';
+      els.bellBadge.textContent = count > 99 ? '99+' : String(count);
+    } else {
+      els.bellBadge.style.display = 'none';
+    }
+  }
+
+  function timeAgo(ts){
+    if (!ts) return '';
+    const diff = Math.max(0, Date.now() - ts);
+    const mins = Math.floor(diff/60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins/60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs/24);
+    return `${days}d ago`;
+  }
+
+  // ---------- History tab (all past entries, browsable by date) ----------
+  function dateStrFromTs(ts){
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function todayStr(){ return dateStrFromTs(Date.now()); }
+  function formatDateLabel(dateStr){
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+  }
+
+  function renderHistory(){
+    const picked = els.historyDateInput.value || todayStr();
+    const entries = Object.values(state.activityLog || {})
+      .filter(e => dateStrFromTs(e.ts) === picked)
+      .sort((a,b) => (b.ts||0) - (a.ts||0));
+    els.historyLabel.textContent = `Activity on ${formatDateLabel(picked)} (${entries.length})`;
+    if (!entries.length) {
+      els.historyList.innerHTML = '<div class="empty-state"><div class="big">🗓️</div>No activity logged for this date.</div>';
+      return;
+    }
+    els.historyList.innerHTML = '';
+    for (const entry of entries) {
+      const actionLabel = entry.action === 'add' ? 'Added' : entry.action === 'delete' ? 'Removed' : 'Updated';
+      const sectionLabel = SECTION_LABEL[entry.section] || '';
+      const timeLabel = new Date(entry.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const card = document.createElement('div');
+      card.className = 'hist-card';
+      card.innerHTML = `
+        <div class="hist-top"><span>${timeLabel}</span></div>
+        <div class="hist-text">
+          ${sectionLabel ? `<span class="hist-section-tag">${sectionLabel}</span>` : ''}
+          <b>${escapeHtml(entry.itemName||'')}</b> — ${actionLabel}<br>
+          ${escapeHtml(entry.detail||'')}
+        </div>
+      `;
+      els.historyList.appendChild(card);
+    }
+  }
+  els.historyDateInput.addEventListener('change', renderHistory);
+  els.historyDateInput.parentElement.addEventListener('click', () => {
+    if (typeof els.historyDateInput.showPicker === 'function') {
+      try { els.historyDateInput.showPicker(); } catch(e) { els.historyDateInput.focus(); }
+    } else {
+      els.historyDateInput.focus();
+    }
+  });
+  els.historyTodayBtn.addEventListener('click', () => {
+    els.historyDateInput.value = todayStr();
+    renderHistory();
+  });
+
+  // ---------- Reorder tab (derived from logged stock increases) ----------
+  function computeOrderEvents(){
+    const map = {}; // itemName -> [{ts, delta}]
+    for (const entry of Object.values(state.activityLog || {})) {
+      if (entry.section !== 'inventory') continue;
+      if (entry.action !== 'add' && entry.action !== 'update') continue;
+      if (entry.afterQty == null) continue;
+      const before = entry.beforeQty == null ? 0 : Number(entry.beforeQty);
+      const after = Number(entry.afterQty);
+      const delta = after - before;
+      if (delta > 0) {
+        (map[entry.itemName] = map[entry.itemName] || []).push({ ts: entry.ts, delta });
+      }
+    }
+    return map;
+  }
+
+  function renderReorder(){
+    const orderEvents = computeOrderEvents();
+    const items = Object.entries(state.inventoryItems || {});
+    els.reorderList.innerHTML = '';
+    if (!items.length) {
+      els.reorderList.innerHTML = '<div class="empty-state"><div class="big">🔁</div>Add inventory items first — this tab will then show when to reorder each one, based on the quantity increases you log.</div>';
+      return;
+    }
+    const groups = {};
+    for (const [id, it] of items) {
+      const cat = it.category || 'Uncategorised';
+      (groups[cat] = groups[cat] || []).push([id, it]);
+    }
+    const catNames = Object.keys(groups).sort();
+    const now = Date.now();
+    const thisMonthKey = new Date().toISOString().slice(0,7);
+
+    for (const cat of catNames) {
+      const catLabel = document.createElement('div');
+      catLabel.className = 'category-label';
+      catLabel.textContent = cat;
+      els.reorderList.appendChild(catLabel);
+      groups[cat].sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+      for (const [id, it] of groups[cat]) {
+        const events = (orderEvents[it.name] || []).slice().sort((a,b) => a.ts - b.ts);
+        let lastDateLabel='—', lastQtyLabel='—', ordersThisMonth=0, avgDaysLabel='—', nextLabel='—', rowClass='';
+        if (events.length) {
+          const last = events[events.length-1];
+          lastDateLabel = new Date(last.ts).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'2-digit'});
+          lastQtyLabel = `${last.delta} ${it.unit||''}`;
+          ordersThisMonth = events.filter(e => new Date(e.ts).toISOString().slice(0,7) === thisMonthKey).length;
+          if (events.length >= 2) {
+            const spanDays = (last.ts - events[0].ts) / 86400000;
+            const avg = spanDays / (events.length - 1);
+            avgDaysLabel = avg.toFixed(1) + 'd';
+            const nextTs = last.ts + avg * 86400000;
+            nextLabel = new Date(nextTs).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'2-digit'});
+            if (nextTs < now) rowClass = 'overdue';
+            else if (nextTs - now <= 2*86400000) rowClass = 'soon';
+          }
+        }
+        const card = document.createElement('div');
+        card.className = 'reorder-card';
+        card.innerHTML = `
+          <div class="reorder-name">${escapeHtml(it.name)}</div>
+          <div class="reorder-grid">
+            <div class="ro-item"><span class="ro-label">Last order</span><span class="ro-value">${lastDateLabel}</span></div>
+            <div class="ro-item"><span class="ro-label">Last qty</span><span class="ro-value">${lastQtyLabel}</span></div>
+            <div class="ro-item"><span class="ro-label">Orders this month</span><span class="ro-value">${ordersThisMonth}</span></div>
+            <div class="ro-item"><span class="ro-label">Avg days between</span><span class="ro-value">${avgDaysLabel}</span></div>
+            <div class="ro-item ${rowClass}" style="grid-column:1/-1;">
+              <span class="ro-label">Suggested next order</span>
+              <span class="ro-value">${nextLabel}${rowClass==='overdue' ? ' ⚠️ overdue' : (rowClass==='soon' ? ' • due soon' : '')}</span>
+            </div>
+          </div>
+        `;
+        els.reorderList.appendChild(card);
+      }
+    }
+  }
+
+  els.bellBtn.addEventListener('click', () => {
+    els.logDrawer.classList.add('open');
+    els.logBackdrop.classList.add('open');
+    localStorage.setItem(LS_LAST_SEEN, String(Date.now()));
+    renderLog();
+  });
+  function closeLog(){
+    els.logDrawer.classList.remove('open');
+    els.logBackdrop.classList.remove('open');
+  }
+  els.closeLogBtn.addEventListener('click', closeLog);
+  els.logBackdrop.addEventListener('click', closeLog);
+
+  // ---------- Boot ----------
+  loadState().then(startSync);
+})();
+</script>
+
+</body>
+</html>
